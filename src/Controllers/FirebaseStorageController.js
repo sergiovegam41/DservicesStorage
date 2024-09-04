@@ -12,6 +12,23 @@ const __dirname = path.dirname(__filename);
 
 class FirebaseStorageController {
   static async get(MongoClient, req, res) {
+
+    let session = await SessionsController.getCurrentSession(
+      MongoClient,
+      req
+    );
+
+    console.log("session:")
+    console.log(session)
+
+
+    if(!session){
+      return res.status(401).send({
+        success: false,
+        message: "unauthorized",
+      });
+    }
+
     const filePath = req.params[0]; 
 
     let credentials = (
@@ -25,7 +42,46 @@ class FirebaseStorageController {
         name: "FIREBASE_BUCKET",
       })
     ).value;
+
+    let FileName = filePath
+
+    if( session.userApp ){
+
+      let FoundFile = await MongoClient.collection(DBNames.uploads).findOne(
+        {
+          path: filePath
+        }
+      );
   
+      if(!FoundFile){
+
+        return res.status(404).send({
+          success: false,
+          message: "Archivo no encontrado",
+        });
+
+      }
+  
+  
+      console.log("FoundFile:")
+      console.log(FoundFile)
+  
+      if( FoundFile?.userID.toString() != session?.user?.id?.toString() ){
+
+        return res.status(403).send({
+          success: false,
+          message: "No tienes permisos para acceder a este recurso",
+        });
+
+      }
+
+      FileName = FoundFile.name
+
+    }
+    
+    console.log("filePath:")
+    console.log(filePath)
+
     credentials = JSON.parse(credentials);
     if (!admin.apps.length) {
       // Evitar re-inicialización
@@ -51,7 +107,7 @@ class FirebaseStorageController {
       const readStream = file.createReadStream();
 
       // Configurar los encabezados para la descarga
-      res.setHeader("Content-Disposition", `attachment; filename=file`);
+      res.setHeader("Content-Disposition", `attachment; filename=`);
       res.setHeader("Content-Type", "application/octet-stream");
 
       readStream.pipe(res);
@@ -88,6 +144,11 @@ class FirebaseStorageController {
         })
       ).value;
       
+      let buketName = (
+        await MongoClient.collection(DBNames.Config).findOne({
+          name: "FIREBASE_BUCKET",
+        })
+      ).value;
   
       credentials = JSON.parse(credentials);
       if (!admin.apps.length) {
@@ -95,7 +156,7 @@ class FirebaseStorageController {
   
         admin.initializeApp({
           credential: admin.credential.cert(credentials),
-          storageBucket: "dservices-ea943.appspot.com",
+          storageBucket: buketName,
         });
       }
   
