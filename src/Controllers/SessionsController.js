@@ -7,6 +7,14 @@ class SessionsController{
         let session_token = (req.headers.authorization||"").replace('Bearer ', '');
         
         // console.log(session_token)
+        if(!session_token){
+            session_token = req.query.access_token
+        }
+
+        if(!session_token){
+            session_token = req.body.access_token
+        }
+        
         
         let session_tokensCollection = MongoClient.collection(DBNames.sessionTokens);
 
