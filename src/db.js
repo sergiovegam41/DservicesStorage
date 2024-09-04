@@ -5,6 +5,11 @@ import { MongoClient, ServerApiVersion } from "mongodb";
 export class DBNames {
   static uploads = "uploads";
   static Config = "Config";
+  static sessionTokens = "session_tokens";
+  static UserCopy = "UserCopy";
+  static technical_workplace = "technical_workplace";
+  static BackList = "BackList";
+
 }
 
 export const connectDB = async (onConnect) => {

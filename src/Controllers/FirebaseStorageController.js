@@ -4,12 +4,15 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import moment from "moment";
+import Utils from './../Utils/Utils.js';
+import SessionsController from "./SessionsController.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 class FirebaseStorageController {
   static async get(MongoClient, req, res) {
-    const filePath = req.query.filePath; // Asegúrate de pasar el path del archivo también
+    const filePath = req.params[0]; 
 
     let credentials = (
       await MongoClient.collection(DBNames.Config).findOne({
@@ -17,19 +20,24 @@ class FirebaseStorageController {
       })
     ).value;
 
+    let buketName = (
+      await MongoClient.collection(DBNames.Config).findOne({
+        name: "FIREBASE_BUCKET",
+      })
+    ).value;
+  
     credentials = JSON.parse(credentials);
     if (!admin.apps.length) {
       // Evitar re-inicialización
       admin.initializeApp({
         credential: admin.credential.cert(credentials),
-        storageBucket: "dservices-ea943.appspot.com",
+        storageBucket: buketName,
       });
     }
 
     const bucket = admin.storage().bucket();
     const file = bucket.file(`${filePath}`);
 
-    console.log(filePath);
 
     try {
       const [exists] = await file.exists();
@@ -66,67 +74,89 @@ class FirebaseStorageController {
   }
 
   static async upload(MongoClient, req, res) {
-    let credentials = (
-      await MongoClient.collection(DBNames.Config).findOne({
-        name: "FIREBASE_CREDENTIALS",
-      })
-    ).value;
 
-    credentials = JSON.parse(credentials);
-    if (!admin.apps.length) {
-      // Evitar re-inicialización
+    try {
+      let session = await SessionsController.getCurrentSession(
+        MongoClient,
+        req
+      );
+  
+  
+      let credentials = (
+        await MongoClient.collection(DBNames.Config).findOne({
+          name: "FIREBASE_CREDENTIALS",
+        })
+      ).value;
+      
+  
+      credentials = JSON.parse(credentials);
+      if (!admin.apps.length) {
+        // Evitar re-inicialización
+  
+        admin.initializeApp({
+          credential: admin.credential.cert(credentials),
+          storageBucket: "dservices-ea943.appspot.com",
+        });
+      }
+  
+  
+  
+      const bucket = admin.storage().bucket();
+      let extencion = Utils.obtenerExtension(req.files[0].originalname);
+      let Originalfilename = req.files[0].originalname;
+      let filename = req.files[0].filename;
+  
+  
+  
+  
+      const uploadPath = path.join(__dirname, "../../uploads", filename);
+      const timestamp = moment().format("YYYY-MM-DD HH:mm:ss"); // Generar un timestamp único
+  
+      let uploads = await MongoClient.collection(DBNames.uploads).insertOne({
+        extencion: extencion,
+        userID: session.user.id,
+        size: req.files[0].size,
+        date: timestamp,
+        
+      });
+  
+  
+      const uniqueFileName = uploads.insertedId.toString() + "." + extencion; // Crear nombre único
+  
+      const remotePath = `${req.body.path}/${uniqueFileName}`;
+      const dataImage = await bucket.upload(uploadPath, {
+        destination: remotePath,
+      });
+  
+      await MongoClient.collection(DBNames.uploads).updateOne(
+        { _id: uploads.insertedId },
+        {
+          $set: {
+            name: uniqueFileName,
+            path: req.body.path + "/" + uniqueFileName,
+          },
+        }
+      );
+  
+      fs.unlinkSync(uploadPath);
+      res.send({
+        success: true,
+        message: "OK",
+        data:  await MongoClient.collection(DBNames.uploads).findOne({ _id: uploads.insertedId }),
+      });
+    } catch (error) {
 
-      admin.initializeApp({
-        credential: admin.credential.cert(credentials),
-        storageBucket: "dservices-ea943.appspot.com",
+      console.log(error)
+      res.send({
+        success: false,
+        message: error,
+        data:  null
       });
     }
 
-    console.log(req.files);
-
-    const bucket = admin.storage().bucket();
-    let extencion = req.files[0].mimetype.split("/")[1];
-    let Originalfilename = req.files[0].originalname;
-    let filename = req.files[0].filename;
-
-    console.log(extencion);
-    const uploadPath = path.join(__dirname, "../../uploads", filename);
-
-    const timestamp = moment().format("YYYYMMDDHHmmss"); // Generar un timestamp único
-
-    let uploads = await MongoClient.collection(DBNames.uploads).insertOne({
-      extencion: extencion,
-      userID: "1",
-      size: req.files[0].size,
-      date: timestamp,
-    });
-
-    console.log(uploads.insertedId.toString());
-
-    const uniqueFileName = uploads.insertedId.toString() + "." + extencion; // Crear nombre único
-
-    const remotePath = `${req.body.path}/${uniqueFileName}`;
-    const dataImage = await bucket.upload(uploadPath, {
-      destination: remotePath,
-    });
-
-    await MongoClient.collection(DBNames.uploads).updateOne(
-      { _id: uploads.insertedId },
-      {
-        $set: {
-          name: uniqueFileName,
-          path: req.body.path + "/" + uniqueFileName,
-        },
-      }
-    );
-
-    fs.unlinkSync(uploadPath);
-    res.send({
-      success: true,
-      message: "OK",
-      data: dataImage,
-    });
   }
+
+  
 }
 
 export default FirebaseStorageController;

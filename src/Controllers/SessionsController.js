@@ -6,10 +6,15 @@ class SessionsController{
        try {
         let session_token = (req.headers.authorization||"").replace('Bearer ', '');
         
+        // console.log(session_token)
+        
         let session_tokensCollection = MongoClient.collection(DBNames.sessionTokens);
+
         let session = await session_tokensCollection.findOne({ session_token });
         
+
         if(session){
+            
             if(session.userApp){
                 return {
                     ...session,
@@ -18,6 +23,7 @@ class SessionsController{
                     back_list: await MongoClient.collection(DBNames.BackList).findOne({ userID: parseInt(session.user_id )}),
                 }
             }
+            
             return {
                 ...session,
                 user: null,
@@ -29,6 +35,9 @@ class SessionsController{
 
         return  false
        } catch (error) {
+
+        console.log("error:")
+        console.log(error)
         return  false
 
        }
