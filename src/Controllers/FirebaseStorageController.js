@@ -185,7 +185,7 @@ class FirebaseStorageController {
       console.log(session)
       let uploads = await MongoClient.collection(DBNames.uploads).insertOne({
         extencion: extencion,
-        userID: session.user.id,
+        userID: session.userApp ? (session?.user?.id) : null,
         size: req.files[0].size,
         date: timestamp,
         public: publicFile
