@@ -176,10 +176,10 @@ class FirebaseStorageController {
   
       const uploadPath = path.join(__dirname, "../../uploads", filename);
       const timestamp = moment().format("YYYY-MM-DD HH:mm:ss"); // Generar un timestamp único
-      let public = false;
+      let publicFile = false;
 
       if(req.body.public === true ){
-        public = true;
+        publicFile = true;
       }
   
       let uploads = await MongoClient.collection(DBNames.uploads).insertOne({
@@ -187,7 +187,7 @@ class FirebaseStorageController {
         userID: session.user.id,
         size: req.files[0].size,
         date: timestamp,
-        public: public
+        public: publicFile
         
       });
   
