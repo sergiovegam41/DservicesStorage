@@ -181,7 +181,8 @@ class FirebaseStorageController {
       if(req.body.public === true ){
         publicFile = true;
       }
-  
+
+      console.log(session)
       let uploads = await MongoClient.collection(DBNames.uploads).insertOne({
         extencion: extencion,
         userID: session.user.id,
