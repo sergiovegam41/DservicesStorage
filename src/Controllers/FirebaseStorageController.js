@@ -65,16 +65,20 @@ class FirebaseStorageController {
   
       console.log("FoundFile:")
       console.log(FoundFile)
-  
-      if( FoundFile?.userID.toString() != session?.user?.id?.toString() ){
 
-        return res.status(403).send({
-          success: false,
-          message: "No tienes permisos para acceder a este recurso",
-        });
+      if(FoundFile?.public == false ){
+        
+        if( ( FoundFile?.userID.toString() != session?.user?.id?.toString() )  ){
+  
+          return res.status(403).send({
+            success: false,
+            message: "No tienes permisos para acceder a este recurso",
+          });
+  
+        }
 
       }
-
+      
       FileName = FoundFile.name
 
     }
@@ -172,12 +176,18 @@ class FirebaseStorageController {
   
       const uploadPath = path.join(__dirname, "../../uploads", filename);
       const timestamp = moment().format("YYYY-MM-DD HH:mm:ss"); // Generar un timestamp único
+      let public = false;
+
+      if(req.body.public === true ){
+        public = true;
+      }
   
       let uploads = await MongoClient.collection(DBNames.uploads).insertOne({
         extencion: extencion,
         userID: session.user.id,
         size: req.files[0].size,
         date: timestamp,
+        public: public
         
       });
   
