@@ -66,9 +66,11 @@ class FirebaseStorageController {
       console.log("FoundFile:")
       console.log(FoundFile)
 
+          console.log(FoundFile)
+
       if(FoundFile?.public == false ){
         
-        if( ( FoundFile?.userID.toString() != session?.user?.id?.toString() )  ){
+        if( ( FoundFile?.userID?.toString() != session?.user?.id?.toString() )  ){
   
           return res.status(403).send({
             success: false,
