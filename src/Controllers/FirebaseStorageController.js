@@ -19,8 +19,6 @@ class FirebaseStorageController {
     );
 
 
-
-
     if(!session){
       return res.status(401).send({
         success: false,
@@ -181,6 +179,7 @@ class FirebaseStorageController {
       let uploads = await MongoClient.collection(DBNames.uploads).insertOne({
         extencion: extencion,
         userID: session.user_id,
+        role:  session.role,
         size: req.files[0].size,
         date: timestamp,
         public: publicFile
