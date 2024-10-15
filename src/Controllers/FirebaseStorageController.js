@@ -18,8 +18,7 @@ class FirebaseStorageController {
       req
     );
 
-    console.log("session:")
-    console.log(session)
+
 
 
     if(!session){
@@ -62,11 +61,8 @@ class FirebaseStorageController {
 
       }
   
-  
-      console.log("FoundFile:")
-      console.log(FoundFile)
 
-          console.log(FoundFile)
+
 
       if(FoundFile?.public == false ){
         
@@ -84,9 +80,7 @@ class FirebaseStorageController {
       FileName = FoundFile.name
 
     }
-    
-    console.log("filePath:")
-    console.log(filePath)
+
 
     credentials = JSON.parse(credentials);
     if (!admin.apps.length) {
@@ -184,7 +178,6 @@ class FirebaseStorageController {
         publicFile = true;
       }
 
-      console.log(session)
       let uploads = await MongoClient.collection(DBNames.uploads).insertOne({
         extencion: extencion,
         userID: session.user_id,
