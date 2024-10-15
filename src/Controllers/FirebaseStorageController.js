@@ -198,7 +198,7 @@ class FirebaseStorageController {
         { _id: uploads.insertedId },
         {
           $set: {
-            name: uniqueFileName,
+            name: remotePath,
             path: remotePath,
           },
         }
