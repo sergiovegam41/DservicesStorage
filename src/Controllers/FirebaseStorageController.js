@@ -187,9 +187,9 @@ class FirebaseStorageController {
       });
   
   
-      // const uniqueFileName = uploads.insertedId.toString() + "." + extencion; // Crear nombre único
+      const uniqueFileName = uploads.insertedId.toString() + "." + extencion; // Crear nombre único
   
-      const remotePath = `${req.body.path}`;
+      const remotePath = `${req.body.path}/${uniqueFileName}`;
       const dataImage = await bucket.upload(uploadPath, {
         destination: remotePath,
       });
@@ -198,8 +198,8 @@ class FirebaseStorageController {
         { _id: uploads.insertedId },
         {
           $set: {
-            name: remotePath,
-            path: remotePath,
+            name: uniqueFileName,
+            path: req.body.path + "/" + uniqueFileName,
           },
         }
       );
