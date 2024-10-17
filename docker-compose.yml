@@ -1,0 +1,16 @@
+version: '3'
+services:
+  bot-storage:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dservices-storage
+    restart: unless-stopped
+    networks:
+      - my-external-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+networks:
+    my-external-network:
+        external: true
