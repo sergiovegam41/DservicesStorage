@@ -6,11 +6,13 @@ services:
       dockerfile: Dockerfile
     container_name: dservices-storage
     restart: unless-stopped
+    ports:
+      - "3200:3200"
     networks:
-      - my-external-network
+      - global-network
     volumes:
       - .:/app
       - /app/node_modules
 networks:
-    my-external-network:
+    global-network:
         external: true
