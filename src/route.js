@@ -19,11 +19,11 @@ export default (app, MongoClient) => {
     // FirebaseStorageController.get(MongoClient, req, res)
     res.status(200).send("1) ok:" + req.params.path)
   );
-  
-  app.get("/storage/get/:path(*)", async (req, res) =>
-    // FirebaseStorageController.get(MongoClient, req, res)
-    res.status(200).send("1) ok:" + req.params.path)
-  );
+
+  // app.get("/storage/get/:path(*)", async (req, res) =>
+  //   // FirebaseStorageController.get(MongoClient, req, res)
+  //   res.status(200).send("1) ok:" + req.params.path)
+  // );
 
 
   app.get("/ping", async function (req, res) {
