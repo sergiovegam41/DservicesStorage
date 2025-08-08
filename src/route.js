@@ -20,7 +20,7 @@ export default (app, MongoClient) => {
   //   res.status(200).send("1) ok:" + req.params.path)
   // );
   
-  app.get("/storage/get/:path(*)",validationMiddleware, async (req, res) =>
+  app.get("/storage/get/*",validationMiddleware, async (req, res) =>
     FirebaseStorageController.get(MongoClient, req, res)
     // res.status(200).send("1) ok:" + req.params.path)
   );
