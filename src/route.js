@@ -15,10 +15,11 @@ export default (app, MongoClient) => {
   // app.get("/storage/get/:path(*)", validationMiddleware, async (req, res) =>
   //   FirebaseStorageController.get(MongoClient, req, res)
   // );
-  app.get("/s/g/a", async (req, res) =>
+  app.get("/a", async (req, res) => {
+    res.status(200).send("1) ok:" );
+  });
     // FirebaseStorageController.get(MongoClient, req, res)
-    res.status(200).send("1) ok:" + req.params.path)
-  );
+  
 
   // app.get("/storage/get/:path(*)", async (req, res) =>
   //   // FirebaseStorageController.get(MongoClient, req, res)
